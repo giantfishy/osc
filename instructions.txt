@@ -1,0 +1,25 @@
+Hi, and thanks for downloading osc!
+
+It uses a few different programs to run, so there are some things you'll need to install before it'll work.
+
+First you'll need to download the Ruby programming language. You can skip this if you're on a Mac, since Ruby comes pre-installed with Mac OS X. If you're on a Windows, you can download Ruby from http://www.ruby-lang.org/en/downloads.
+
+Next you'll need to download Rubygems. Download the latest version from http://rubygems.org/pages/download and extract the zip file, then open a console window (on Windows, you'll need to open a Ruby console window, which can be accessed under All Programs > Ruby(version number) > Start Command Prompt with Ruby, and on Mac this is the Terminal, under Applications > Utilities). The console window can be tricky for newcomers, but for installing osc, you'll only need to learn one command: cd (which stands for 'change directory' - a directory being a folder). cd is used for changing which folder you're in; it's the same as double-clicking on a folder in the Finder or Windows Explorer window.
+
+The following instructions are for Windows only:
+
+Typing 'cd My Documents' into the console window will move you to the My Documents folder, as long as the My Documents folder is inside the folder you're in (it's usually inside the folder you're in when you open a new Command Prompt window). Then, type 'cd Downloads' (RubyGems will probably be in your Downloads folder), then cd into the folder you extracted earlier. Then, type 'ruby setup.rb'. This will run the Ruby file which sets up rubygems.
+
+The following instructions are for Mac only:
+
+Typing 'cd Downloads' into Terminal will move you to the Downloads folder, as long as the Downloads folder is inside the folder you're in (it's usually inside the folder you're in when you open a new Terminal window). Then, type 'ruby setup.rb'. This will run the Ruby file which sets up rubygems.
+
+The following instructions are for Mac and Windows.
+
+After this, you can type 'gem install gosu'. This will install Gosu (the code library used for osc).
+
+Now that everything is installed, you can run osc by 'cd'ing inside the folder named 'osc' and typing 'ruby osc.rb'!
+
+If you come across any problems while setting up osc, please email me at callumgj@gmail.com and I'll try to help as quickly as possible. :)
+
+The controls for osc are WASD (instead of the arrow keys) to move osc, and left mouse button to fire a fireball from osc in the direction of the mouse button.
