@@ -49,7 +49,6 @@ class Creature < GameObject
 		@cooldown = 30
 		@exists = 1
 		@gravity = 0
-		@dir = 1
 	end
 	def goto(x, y); super; end
 	def respawn
@@ -58,7 +57,6 @@ class Creature < GameObject
 	end
 	def x; @x; end
 	def y; @y; end
-	def dir; @dir; end
 	def exists; @exists; end
 	def draw
 #		@image.draw_rot((((@x + 5) / 5).round * 5), (((@y + 5) / 5).round * 5), 100, 0)
@@ -147,19 +145,11 @@ class Creature < GameObject
 	def left
 		if $paused == false
 			@x -= 4
-			if $osc == self
-				@image = Gosu::Image.new($window, "creatures/oscleft.png", true)
-				@dir = 0
-			end
 		end
 	end
 	def right
 		if $paused == false
 			@x += 4
-			if $osc == self
-				@image = Gosu::Image.new($window, "creatures/oscright.png", true)
-				@dir = 1
-			end
 		end
 	end
 	def fireball
@@ -184,6 +174,7 @@ class Enemy < Creature
 		@health = health
 		@cooldown = 50
 		@speed = speed
+		@bright = false
 		parentlevel.add(self)
 	end
 	def itemtype; "enemy"; end
@@ -196,12 +187,13 @@ class Enemy < Creature
 	def y; @y; end
 	def exists; @exists; end
 	def draw
-		super
+		if @bright == true
+			super
+		end
 	end
 	def update
 		super
-		@toosc = Vector[($osc.x - @x), ($osc.y - @y)]
-		if ($osc.x - @x).abs > 10 and @toosc.r < 200
+		if ($osc.x - @x).abs > 10
 			if $osc.x < @x
 				left
 			else
@@ -222,6 +214,12 @@ class Enemy < Creature
 		end
 		if @health < 1
 			self.delete
+		end
+		@toosc = Vector[($osc.x - @x), ($osc.y - @y)]
+		if @toosc.r.round < 130
+			@bright = true
+		else
+			@bright = false
 		end
 	end
 	def edgecheck
@@ -263,6 +261,8 @@ end
 class Block < GameObject
 	def initialize (window, x, y, image)
 		@image = Gosu::Image.new(window, image, true)
+		@silimage = Gosu::Image.new(window, "silblock.png", true)
+		@bright = false
 		@x = x
 		@y = y
 		$everything = $everything + [self]
@@ -274,9 +274,20 @@ class Block < GameObject
 	def y; @y; end
 	def exists; @exists; end
 	def draw
-		@image.draw_rot(@x, @y, 1, 0)
+		if @bright == true
+			@image.draw_rot(@x, @y, 1, 0)
+		else
+			@silimage.draw_rot(@x, @y, 1, 0)
+		end
 	end
-	def update; end
+	def update
+		@toosc = Vector[($osc.x - @x), ($osc.y - @y)]
+		if @toosc.r.round < 130
+			@bright = true
+		else
+			@bright = false
+		end
+	end
 	def delete
 		super
 	end
@@ -287,6 +298,7 @@ class Prop < GameObject
 		@image = Gosu::Image.new(window, image, true)
 		@x = x
 		@y = y
+		@bright = false
 		$everything = $everything + [self]
 		@exists = 1
 	end
@@ -294,9 +306,18 @@ class Prop < GameObject
 	def y; @y; end
 	def exists; @exists; end
 	def draw
-		@image.draw_rot(@x, @y, 0, 0)
+		if @bright == true
+			@image.draw_rot(@x, @y, 0, 10)
+		end
 	end
-	def update; end
+	def update
+		@toosc = Vector[($osc.x - @x), ($osc.y - @y)]
+		if @toosc.r.round < 130
+			@bright = true
+		else
+			@bright = false
+		end
+	end
 	def delete
 		super
 	end
@@ -354,8 +375,7 @@ class TurretFireball < Projectile
 	def y; @y; end
 	def exists; super; end
 	def draw
-		@particleangle = Vector[@xspeed, @yspeed].r + 180 + rand(90)
-		Particle.new($window, @x, @y, "effects/splosionsmall.png", @particleangle, 3, 6)
+		Particle.new($window, @x, @y, "effects/splosionsmall.png", rand(360), 1, 5)
 		@image.draw_rot(@x.round, @y.round, 0, 0)
 	end
 	def update
@@ -510,69 +530,43 @@ class Sign < GameObject
 	end
 end
 
-# class Turret < GameObject
-	# def initialize (window, x, y, parentlevel)
-		# @image = Gosu::Image.new(window, "interactives/turret.png", true)
-		# @x = x
-		# @y = y
-		# $everything = $everything + [self]
-		# $blocks += [self]
-		# $enemies += [self]
-		# @exists = 1
-		# @health = 50
-		# @cooldown = 50
-		# parentlevel.add(self)
-	# end
-	# def itemtype; "turret"; end
-	# def x; @x; end
-	# def y; @y; end
-	# def exists; @exists; end
-	# def draw
-		# @image.draw_rot(@x, @y, 0, 0)
-	# end
-	# def hurt(damage)
-		# @health -= damage
-	# end
-	# def update
-		# @toosc = Vector[($osc.x - @x), ($osc.y - @y)]
-		# if @toosc.r < 1000 and @cooldown < 0
-			# TurretFireball.new($window, @x, @y, Gosu::offset_x(@toosc.theta, 7), Gosu::offset_y(@toosc.theta, 7), "projectiles/turretfireball.png")
-			# @cooldown = 50
-		# end
-		# if @health < 1
-			# self.delete
-		# end
-		# @cooldown -= 1
-	# end
-	# def delete
-		# super
-		# $blocks -= [self]
-	# end
-# end
-
-class Spikes < GameObject
-	def initialize(window, x, y, parentlevel)
-		@image = Gosu::Image.new(window, "interactives/spikes.png", true)
+class Turret < GameObject
+	def initialize (window, x, y, parentlevel)
+		@image = Gosu::Image.new(window, "interactives/turret.png", true)
 		@x = x
 		@y = y
-		$everything += [self]
+		$everything = $everything + [self]
+		$blocks += [self]
+		$enemies += [self]
 		@exists = 1
+		@health = 50
+		@cooldown = 50
 		parentlevel.add(self)
 	end
-	def itemtype; "spikes"; end
+	def itemtype; "turret"; end
 	def x; @x; end
 	def y; @y; end
 	def exists; @exists; end
 	def draw
 		@image.draw_rot(@x, @y, 0, 0)
 	end
+	def hurt(damage)
+		@health -= damage
+	end
 	def update
-		if ($osc.y - @y).abs < 10 and ($osc.x - @x).abs < 25
-			$osc.respawn
+		@toosc = Vector[($osc.x - @x), ($osc.y - @y)]
+		if @toosc.r < 1000 and @cooldown < 0
+			TurretFireball.new($window, @x, @y, Gosu::offset_x(@toosc.theta, 7), Gosu::offset_y(@toosc.theta, 7), "projectiles/turretfireball.png")
+			@cooldown = 50
 		end
+		if @health < 1
+			self.delete
+		end
+		@cooldown -= 1
 	end
 	def delete
 		super
+		$blocks -= [self]
 	end
 end
 
@@ -652,26 +646,26 @@ class GenericHUD < GameObject
 	def delete; super; end
 end
 
-# class Cursor < GameObject
-	# def initialize (window, x, y)
-		# @image = Gosu::Image.new(window, "hud/cursor.png", true)
-		# @x = x
-		# @y = y
-		# $everything += [self]
-		# @exists = 1
-	# end
-	# def goto(x, y); super; end
-	# def x; @x; end
-	# def y; @y; end
-	# def exists; @exists; end
-	# def draw
-		# @image.draw_rot(@x.round, @y.round, 1337, 0)
-	# end
-	# def update
-		# goto($mx, $my)
-	# end
-	# def delete; super; end
-# end
+class Cursor < GameObject
+	def initialize (window, x, y)
+		@image = Gosu::Image.new(window, "hud/cursor.png", true)
+		@x = x
+		@y = y
+		$everything += [self]
+		@exists = 1
+	end
+	def goto(x, y); super; end
+	def x; @x; end
+	def y; @y; end
+	def exists; @exists; end
+	def draw
+		@image.draw_rot(@x.round, @y.round, 1337, 0)
+	end
+	def update
+		goto($mx, $my)
+	end
+	def delete; super; end
+end
 
 class Particle < GameObject
 	def initialize(window, x, y, image, angle, speed, lifespan)
@@ -691,34 +685,6 @@ class Particle < GameObject
 		if @lifespan < 0
 			delete
 		end
-	end
-end
-
-class Scarf < GameObject
-	def initialize(window, x, y)
-		@window = window
-		@image = Gosu::Image.new(@window, "scarf/right1.png", true)
-		@x = x
-		@y = y
-		$everything += [self]
-		@exists = 1
-		@anim = 0
-	end
-	def update
-		@x = $osc.x
-		@y = $osc.y
-		if $osc.dir == 1
-			@image = Gosu::Image.new(@window, $scright[@anim], true)
-		else
-			@image = Gosu::Image.new(@window, $scleft[@anim], true)
-		end	
-		@anim += 1
-		if @anim > 2
-			@anim = 1
-		end
-	end
-	def draw
-		@image.draw_rot(@x.round, @y.round, 1, 0)
 	end
 end
 
@@ -777,7 +743,7 @@ class Level
 		if @lasty > 600
 			@lasty = 0
 		end
-		$everything = $blocks = $climbables = $enemies = []
+		$everything = $blocks = $climbables = []
 		@level = File.open(@map)
 		$charlist = []
 		repeat(File.size(@map)) { $charlist = $charlist + [@level.getc.chr] }
@@ -832,7 +798,6 @@ class Level
 		end
 		if $placedosc == true
 			$osc = Creature.new($window, @lastx, @lasty, "creatures/osc.png")
-			$sc = Scarf.new($window, 0, 0)
 		end
 		loadextras
 	end
@@ -865,13 +830,13 @@ class Level
 					Climbable.new($window, @blockx, @blocky, "blocks/water.png", self)
 				end
 				if c == "5"
-					Enemy.new($window, @blockx, @blocky, "creatures/zombie.png", 10, 1.8, self)
+					Enemy.new($window, @blockx, @blocky, "creatures/nosc.png", 10, 3, self)
 				end
 				if c == "6"
 					Treasure.new($window, @blockx, @blocky, 100, "treasures/gem.png", self)
 				end
 				if c == "7"
-					Spikes.new($window, @blockx, @blocky, self)
+					Turret.new($window, @blockx, @blocky, self)
 				end
 				if c == "8"
 					Prop.new($window, @blockx, @blocky, "props/tree.png")
@@ -884,7 +849,6 @@ class Level
 				end
 				if c == "x" and $placedosc == false
 					$osc = Creature.new($window, @blockx, @blocky, "creatures/osc.png")
-					$sc = Scarf.new($window, 0, 0)
 					$placedosc = true
 				end
 				@charnum += 1
@@ -903,7 +867,7 @@ class Level
 				end
 			end
 		end
-		#Cursor.new($window, 0, 0)
+		Cursor.new($window, 0, 0)
 		KeyHUD.new($window, 750, 25, "interactives/key.png")
 		$pausescreen = GenericHUD.new($window, 400, 300, "hud/pausescreen.png")
 		$pausescreen.hide
@@ -919,14 +883,13 @@ class Game < Gosu::Window
 		$score = 0
 		$paused = false
 		$test = Prop.new(self, 0, 0, "effects/light.png")
-		@bg = Gosu::Image.new(self, "background.png", true)
+		@bg = Gosu::Image.new(self, "silbg.png", true)
 		$music = Gosu::Sample.new(self, "music/start.mp3")
 		$placedosc = false
+		$lightradius = 0
 		$fireball = 0
 		$blocktypes = ["blocks/brick.png", "blocks/wood.png", "blocks/dirt.png", "blocks/stone.png", "blocks/vinestone.png"]
-		$scleft = ["scarf/left1.png", "scarf/left2.png", "scarf/left3.png"]
-		$scright = ["scarf/right1.png", "scarf/right2.png", "scarf/right3.png"]
-		$music.play(1, 1, true)
+#		$music.play(1, 1, true)
 	end
 	def start
 		$levels = [Level.new("level1.txt", "level1stuff.txt", 0, 0), Level.new("level2.txt", "level2stuff.txt", -1, 0), Level.new("level3.txt", "level3stuff.txt", -2, 0), Level.new("level4.txt", "level4stuff.txt", -2, 1), Level.new("level5.txt", "level5stuff.txt", -3, 1), Level.new("level6.txt", "level6stuff.txt", -3, 0)]
@@ -937,10 +900,14 @@ class Game < Gosu::Window
 		$currentlevel.load
 	end
 	def update
-		self.caption = "osc | score: #{$score}"
+		self.caption = "sil | score: #{$score}"
 		$mx = mouse_x
 		$my = mouse_y
-		$cursor = Gosu::Image.new(self, "hud/cursor.png", true)
+		@osctomouse = Vector[($osc.x - $mx), ($osc.y - $my)]
+		$lightradius = 200 - (@osctomouse.r.round / 2)
+		if $lightradius < 0
+			$lightradius = 0
+		end
 		if button_down? Gosu::Button::KbW
 			$osc.jump
 		end
@@ -966,15 +933,14 @@ class Game < Gosu::Window
 				i.draw
 			end
 		end
-		unless $cursor == nil
-			$cursor.draw_rot($mx.round, $my.round, 1337, 0)
-		end
+		Gosu::Image.new(self, "effects/halo.png", true).draw_rot($osc.x, $osc.y, 0, 0)
 	end
 	def button_down(id)
+		if id == Gosu::Button::KbG
+			$keys += 1
+		end
 		if id == Gosu::Button::MsRight
-			if button_down? Gosu::Button::KbSpace
-				$osc.goto($mx, $my)
-			end
+			$osc.goto($mx, $my)
 		end
 		if id == Gosu::Button::KbEscape
 			if $paused == false
