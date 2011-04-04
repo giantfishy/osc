@@ -814,7 +814,7 @@ class Level
 				Prop.new($window, @blockx, @blocky, "props/grass.png")
 			end
 			if c == "8"
-				Prop.new($window, @blockx, @blocky, "props/tree.png")
+				Prop.new($window, @blockx, @blocky, "props/mushroom.png")
 			end
 			if c == "9"
 				Prop.new($window, @blockx, @blocky, "props/grasstree.png")
