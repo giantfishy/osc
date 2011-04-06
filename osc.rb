@@ -31,7 +31,7 @@ class GameObject
 	def y; @y; end
 	def exists; @exists; end
 	def draw
-		@image.draw_rot(@x, @y, 1, 0)
+		@image.draw_rot(@x.round, @y.round, 1, 0)
 	end
 	def update
 	end
@@ -96,14 +96,6 @@ class Creature < GameObject
 		@cooldown -= 4
 		@y += @gravity
 		@gravity += 0.3
-		if @x < 0
-			if $currentlevel.left == 0
-				respawn
-			else
-				$currentlevel = $currentlevel.left
-				$currentlevel.load
-			end
-		end
 		edgecheck
 		if $osc == self
 			for e in $enemies
@@ -114,9 +106,17 @@ class Creature < GameObject
 		end
 	end
 	def edgecheck
+		if @x < 0
+			if $currentlevel.left == 0
+				@x = 0
+			else
+				$currentlevel = $currentlevel.left
+				$currentlevel.load
+			end
+		end
 		if @x > 800
 			if $currentlevel.right == 0
-				respawn
+				@x = 800
 			else
 				$currentlevel = $currentlevel.right
 				$currentlevel.load
@@ -132,7 +132,7 @@ class Creature < GameObject
 		end
 		if @y < 0
 			if $currentlevel.up == 0
-				respawn
+				@y = 0
 			else
 				$currentlevel = $currentlevel.up
 				$currentlevel.load
@@ -182,7 +182,7 @@ class Enemy < Creature
 		@exists = 1
 		@gravity = 0
 		@health = health
-		@cooldown = 50
+		@cooldown = 100
 		@speed = speed
 		parentlevel.add(self)
 	end
@@ -201,12 +201,17 @@ class Enemy < Creature
 	def update
 		super
 		@toosc = Vector[($osc.x - @x), ($osc.y - @y)]
-		if ($osc.x - @x).abs > 10 and @toosc.r < 200
+		if ($osc.x - @x).abs > 10 and @toosc.r < 200 and @distance < 25
 			if $osc.x < @x
-				left
-			else
 				right
+			else
+				left
 			end
+			if @cooldown < 0
+				shoot(($osc.x + (rand(30) - 15)) - @x, ($osc.y + (rand(30) -15)) - @y)
+				@cooldown = 100
+			end
+			@cooldown -= 1
 		end
 		@distance = 100
 		for b in $blocks
@@ -252,6 +257,11 @@ class Enemy < Creature
 		if $paused == false
 			@x += @speed
 		end
+	end
+	def shoot(x, y)
+		@target = Vector[x, y]
+		@target = @target * (1 / @target.r)
+		EnemyProjectile.new($window, @x, @y, Gosu::offset_x(@target.theta, 10), Gosu::offset_y(@target.theta, 10), "projectiles/fireball.png")
 	end
 	def delete
 		super
@@ -346,41 +356,80 @@ class Projectile < GameObject
 	end
 end
 
-class TurretFireball < Projectile
+class EnemyProjectile < GameObject
 	def initialize(window, x, y, xspeed, yspeed, image)
-		super
+		@image = Gosu::Image.new(window, image, true)
+		@x = x
+		@y = y
+		@xspeed = xspeed
+		@yspeed = yspeed
+		$everything += [self]
+		@exists = 1
 	end
 	def x; @x; end
 	def y; @y; end
-	def exists; super; end
+	def exists; @exists; end
 	def draw
-		@particleangle = Vector[@xspeed, @yspeed].r + 180 + rand(90)
-		Particle.new($window, @x, @y, "effects/splosionsmall.png", @particleangle, 3, 6)
 		@image.draw_rot(@x.round, @y.round, 0, 0)
 	end
 	def update
 		@x += @xspeed
 		@y += @yspeed
 		for b in $blocks
-			if (b.x - @x).abs < 30 and (b.y - @y).abs < 30 and not b.itemtype == "turret"
+			if (b.x - @x).abs < 30 and (b.y - @y).abs < 30
 				self.delete
 			end
 		end
-		for e in $enemies
-			if (e.x - @x).abs < 20 and (e.y - @y).abs < 20 and not b.itemtype == "turret"
-				SplashDamage.new(30, @x, @y, 15)
-			end
-		end
-		@toosc = Vector[($osc.x - @x), ($osc.y - @y)]
-		if @toosc.r < 30
-			$osc.respawn
+		if ($osc.x - @x).abs < 20 and ($osc.y - @y).abs < 20
+			EnemySplashDamage.new(30, @x, @y)
 		end
 		if @x > 800 or @x < 0 or @y > 600 or @y < 0
 			self.delete
 		end
 	end
-	def delete; super; end
+	def delete
+		super
+		@particleangle = 0
+		EnemySplashDamage.new(50, @x, @y)
+		repeat(8) { Particle.new($window, @x, @y, "effects/splosionsmall.png", @particleangle, 5, 5); @particleangle += 45 }
+	end
 end
+
+# class TurretFireball < Projectile
+	# def initialize(window, x, y, xspeed, yspeed, image)
+		# super
+	# end
+	# def x; @x; end
+	# def y; @y; end
+	# def exists; super; end
+	# def draw
+		# @particleangle = Vector[@xspeed, @yspeed].r + 180 + rand(90)
+		# Particle.new($window, @x, @y, "effects/splosionsmall.png", @particleangle, 3, 6)
+		# @image.draw_rot(@x.round, @y.round, 0, 0)
+	# end
+	# def update
+		# @x += @xspeed
+		# @y += @yspeed
+		# for b in $blocks
+			# if (b.x - @x).abs < 30 and (b.y - @y).abs < 30 and not b.itemtype == "turret"
+				# self.delete
+			# end
+		# end
+		# for e in $enemies
+			# if (e.x - @x).abs < 20 and (e.y - @y).abs < 20 and not b.itemtype == "turret"
+				# SplashDamage.new(30, @x, @y, 15)
+			# end
+		# end
+		# @toosc = Vector[($osc.x - @x), ($osc.y - @y)]
+		# if @toosc.r < 30
+			# $osc.respawn
+		# end
+		# if @x > 800 or @x < 0 or @y > 600 or @y < 0
+			# self.delete
+		# end
+	# end
+	# def delete; super; end
+# end
 
 class SplashDamage
 	def initialize(radius, x, y, damage)
@@ -393,6 +442,18 @@ class SplashDamage
 			if @vector.r < @r
 				e.hurt(@damage)
 			end
+		end
+	end
+end
+
+class EnemySplashDamage
+	def initialize(radius, x, y)
+		@x = x
+		@y = y
+		@r = radius
+		@vector = Vector[($osc.x - @x), ($osc.y - @y)]
+		if @vector.r < @r
+			$osc.respawn
 		end
 	end
 end
@@ -418,6 +479,34 @@ class Key < GameObject
 			@particleangle = 0
 			repeat(5) { Particle.new($window, @x, @y, "effects/star.png", @particleangle, 6, 10); @particleangle += 72 }
 			$keys += 1
+			self.delete
+		end
+	end
+	def delete
+		super
+	end
+end
+
+class EmeraldKey < Key
+	def initialize (window, x, y, parentlevel)
+		@image = Gosu::Image.new(window, "interactives/emeraldkey.png", true)
+		@x = x
+		@y = y
+		$everything = $everything + [self]
+		@exists = 1
+		parentlevel.add(self)
+	end
+	def itemtype; "key"; end
+	def x; @x; end
+	def y; @y; end
+	def exists; @exists; end
+	def draw
+		@image.draw_rot(@x, @y, 0, 0)
+	end
+	def update
+		if ($osc.x - @x).abs < 25 and ($osc.y - @y).abs < 25
+			Particle.new($window, @x, @y, "hud/itemget1.png", 0, 0.5, 100)
+			$inventory += ["emeraldkey"]
 			self.delete
 		end
 	end
@@ -458,6 +547,37 @@ end
 class Door < GameObject
 	def initialize (window, x, y, parentlevel)
 		@image = Gosu::Image.new(window, "interactives/door.png", true)
+		@x = x
+		@y = y
+		$everything = $everything + [self]
+		$blocks += [self]
+		@exists = 1
+		parentlevel.add(self)
+	end
+	def itemtype; "door"; end
+	def x; @x; end
+	def y; @y; end
+	def exists; @exists; end
+	def draw
+		@image.draw_rot(@x, @y, 0, 0)
+	end
+	def update
+		if ($osc.x - @x).abs < 50 and ($osc.y - @y).abs < 50 and $keys > 0
+			@particleangle = 0
+			repeat(8) { Particle.new($window, @x, @y, "effects/splosion.png", @particleangle, 8, 5); @particleangle += 45 }
+			$keys -= 1
+			self.delete
+		end
+	end
+	def delete
+		super
+		$blocks -= [self]
+	end
+end
+
+class EmeraldDoor < GameObject
+	def initialize (window, x, y, parentlevel)
+		@image = Gosu::Image.new(window, "interactives/emeralddoor.png", true)
 		@x = x
 		@y = y
 		$everything = $everything + [self]
@@ -874,7 +994,7 @@ class Level
 					Spikes.new($window, @blockx, @blocky, self)
 				end
 				if c == "8"
-					Prop.new($window, @blockx, @blocky, "props/tree.png")
+					EmeraldKey.new($window, @blockx, @blocky, self)
 				end
 				if c == "a"
 					Prop.new($window, @blockx, @blocky, "props/dirtbg.png")
@@ -916,6 +1036,7 @@ class Game < Gosu::Window
 		self.caption = "osc"
 		$everything = $blocks = $enemies = $climbables = []
 		$keys = 0
+		$inventory = []
 		$score = 0
 		$paused = false
 		$test = Prop.new(self, 0, 0, "effects/light.png")
@@ -926,10 +1047,18 @@ class Game < Gosu::Window
 		$blocktypes = ["blocks/brick.png", "blocks/wood.png", "blocks/dirt.png", "blocks/stone.png", "blocks/vinestone.png"]
 		$scleft = ["scarf/left1.png", "scarf/left2.png", "scarf/left3.png"]
 		$scright = ["scarf/right1.png", "scarf/right2.png", "scarf/right3.png"]
-		$music.play(1, 1, true)
+		$music.play(0.4, 1, true)
 	end
 	def start
-		$levels = [Level.new("level1.txt", "level1stuff.txt", 0, 0), Level.new("level2.txt", "level2stuff.txt", -1, 0), Level.new("level3.txt", "level3stuff.txt", -2, 0), Level.new("level4.txt", "level4stuff.txt", -2, 1), Level.new("level5.txt", "level5stuff.txt", -3, 1), Level.new("level6.txt", "level6stuff.txt", -3, 0)]
+		$levels = [Level.new("level1.txt", "level1stuff.txt", 0, 0),
+			Level.new("level2.txt", "level2stuff.txt", -1, 0),
+			Level.new("level3.txt", "level3stuff.txt", -2, 0),
+			Level.new("level4.txt", "level4stuff.txt", -2, 1),
+			Level.new("level5.txt", "level5stuff.txt", -3, 1),
+			Level.new("level6.txt", "level6stuff.txt", -3, 0),
+			Level.new("level7.txt", "level7stuff.txt", -4, 0),
+			Level.new("level8.txt", "level8stuff.txt", -5, 0),
+			Level.new("level9.txt", "level9stuff.txt", -5, -1),]
 		for l in $levels
 			l.link
 		end

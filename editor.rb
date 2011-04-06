@@ -16,7 +16,8 @@ class Item
 		@x = x
 		@y = y
 		@exists = 1
-		if category == 1
+		@category = category
+		if @category == 1
 			$items += [self]
 		else
 			$interactives += [self]
@@ -30,12 +31,16 @@ class Item
 	def category; @category; end
 	def exists; @exists; end
 	def draw
-		@image.draw_rot(@x, @y, 1, 0)
+		if @category == 1
+			@image.draw_rot(@x, @y, 1, 0)
+		else
+			@image.draw_rot(@x, @y, 2, 0)
+		end
 	end
 	def update
 	end
 	def delete
-		if category == 1
+		if @category == 1
 			$items -= [self]
 		else
 			$interactives -= [self]
@@ -102,6 +107,11 @@ class Game < Gosu::Window
 		Icon.new(self, 975, 125, "c", "props/brickbg.png", 1)
 		Icon.new(self, 825, 175, "1", "interactives/key.png", 2)
 		Icon.new(self, 875, 175, "2", "interactives/door.png", 2)
+		Icon.new(self, 925, 175, "3", "props/ladder.png", 2)
+		Icon.new(self, 975, 175, "4", "blocks/water.png", 2)
+		Icon.new(self, 825, 225, "5", "creatures/zombie.png", 2)
+		Icon.new(self, 875, 225, "6", "treasures/gem.png", 2)
+		Icon.new(self, 925, 225, "7", "interactives/spikes.png", 2)
 	end
 	def update
 		self.caption = "Level Editor"
@@ -142,19 +152,19 @@ class Game < Gosu::Window
 			end
 		end
 		if button_down? Gosu::Button::KbS and button_down? Gosu::Button::Kb1
-			levelsave("userlevel1.txt")
+			levelsave("userlevel1.txt", "userlevel1stuff.txt")
 		end
 		if button_down? Gosu::Button::KbS and button_down? Gosu::Button::Kb2
-			levelsave("userlevel2.txt")
+			levelsave("userlevel2.txt", "userlevel2stuff.txt")
 		end
 		if button_down? Gosu::Button::KbS and button_down? Gosu::Button::Kb3
-			levelsave("userlevel3.txt")
+			levelsave("userlevel3.txt", "userlevel3stuff.txt")
 		end
 		if button_down? Gosu::Button::KbS and button_down? Gosu::Button::Kb4
-			levelsave("userlevel4.txt")
+			levelsave("userlevel4.txt", "userlevel4stuff.txt")
 		end
 		if button_down? Gosu::Button::KbS and button_down? Gosu::Button::Kb5
-			levelsave("userlevel5.txt")
+			levelsave("userlevel5.txt", "userlevel5stuff.txt")
 		end
 	end
 	def draw
@@ -188,13 +198,30 @@ class Game < Gosu::Window
 			$cursor.draw_rot($mx.round, $my.round, 1337, 0)
 		end
 	end
-	def levelsave(level)
+	def levelsave(level, levelstuff)
 		$file = File.new(level, "w")
 		@blockx = 25
 		@blocky = 25
 		repeat(192) {
 			@id = 0
 			for i in $items
+				if i.x == (((@blockx + 25) / 50).round * 50) - 25 and i.y == (((@blocky + 25) / 50).round * 50) - 25 and i.exists == 1
+					@id = i.id
+				end
+			end
+			$file.putc("#{@id}")
+			@blockx += 50
+			if @blockx > 800
+				@blockx = 25
+				@blocky += 50
+			end
+		}
+		$file = File.new(levelstuff, "w")
+		@blockx = 25
+		@blocky = 25
+		repeat(192) {
+			@id = 0
+			for i in $interactives
 				if i.x == (((@blockx + 25) / 50).round * 50) - 25 and i.y == (((@blocky + 25) / 50).round * 50) - 25 and i.exists == 1
 					@id = i.id
 				end
