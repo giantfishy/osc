@@ -53,7 +53,15 @@ class Creature < GameObject
 	end
 	def goto(x, y); super; end
 	def respawn
-		goto(@spawnx, @spawny)
+		@particleangle = 0
+		repeat(10) { Particle.new($window, @x, @y, "effects/blood.png", @particleangle, rand(6), 8); @particleangle += 36 }
+		@step = 0
+		until @step > 10
+			@step += 1
+		end
+		goto($checkpoint.x, $checkpoint.y)
+		$currentlevel = $checkpoint.parentlevel
+		$currentlevel.load
 		@gravity = 0
 	end
 	def x; @x; end
@@ -466,6 +474,7 @@ class Key < GameObject
 		$everything = $everything + [self]
 		@exists = 1
 		parentlevel.add(self)
+		@window = window
 	end
 	def itemtype; "key"; end
 	def x; @x; end
@@ -476,37 +485,10 @@ class Key < GameObject
 	end
 	def update
 		if ($osc.x - @x).abs < 25 and ($osc.y - @y).abs < 25
+			Gosu::Sample.new(@window, "sounds/treasure.mp3").play(0.6, 1, false)
 			@particleangle = 0
 			repeat(5) { Particle.new($window, @x, @y, "effects/star.png", @particleangle, 6, 10); @particleangle += 72 }
 			$keys += 1
-			self.delete
-		end
-	end
-	def delete
-		super
-	end
-end
-
-class EmeraldKey < Key
-	def initialize (window, x, y, parentlevel)
-		@image = Gosu::Image.new(window, "interactives/emeraldkey.png", true)
-		@x = x
-		@y = y
-		$everything = $everything + [self]
-		@exists = 1
-		parentlevel.add(self)
-	end
-	def itemtype; "key"; end
-	def x; @x; end
-	def y; @y; end
-	def exists; @exists; end
-	def draw
-		@image.draw_rot(@x, @y, 0, 0)
-	end
-	def update
-		if ($osc.x - @x).abs < 25 and ($osc.y - @y).abs < 25
-			Particle.new($window, @x, @y, "hud/itemget1.png", 0, 0.5, 100)
-			$inventory += ["emeraldkey"]
 			self.delete
 		end
 	end
@@ -523,6 +505,7 @@ class Treasure < GameObject
 		$everything = $everything + [self]
 		@exists = 1
 		parentlevel.add(self)
+		@window = window
 	end
 	def itemtype; "treasure"; end
 	def x; @x; end
@@ -533,6 +516,7 @@ class Treasure < GameObject
 	end
 	def update
 		if ($osc.x - @x).abs < 25 and ($osc.y - @y).abs < 25
+			Gosu::Sample.new(@window, "sounds/treasure.mp3").play(0.6, 1, false)
 			@particleangle = 0
 			repeat(5) { Particle.new($window, @x, @y, "effects/greenstar.png", @particleangle, 6, 10); @particleangle += 72 }
 			$score += 100
@@ -547,37 +531,6 @@ end
 class Door < GameObject
 	def initialize (window, x, y, parentlevel)
 		@image = Gosu::Image.new(window, "interactives/door.png", true)
-		@x = x
-		@y = y
-		$everything = $everything + [self]
-		$blocks += [self]
-		@exists = 1
-		parentlevel.add(self)
-	end
-	def itemtype; "door"; end
-	def x; @x; end
-	def y; @y; end
-	def exists; @exists; end
-	def draw
-		@image.draw_rot(@x, @y, 0, 0)
-	end
-	def update
-		if ($osc.x - @x).abs < 50 and ($osc.y - @y).abs < 50 and $keys > 0
-			@particleangle = 0
-			repeat(8) { Particle.new($window, @x, @y, "effects/splosion.png", @particleangle, 8, 5); @particleangle += 45 }
-			$keys -= 1
-			self.delete
-		end
-	end
-	def delete
-		super
-		$blocks -= [self]
-	end
-end
-
-class EmeraldDoor < GameObject
-	def initialize (window, x, y, parentlevel)
-		@image = Gosu::Image.new(window, "interactives/emeralddoor.png", true)
 		@x = x
 		@y = y
 		$everything = $everything + [self]
@@ -689,6 +642,44 @@ class Spikes < GameObject
 	def update
 		if ($osc.y - @y).abs < 10 and ($osc.x - @x).abs < 25
 			$osc.respawn
+		end
+	end
+	def delete
+		super
+	end
+end
+
+class Checkpoint < GameObject
+	def initialize (window, x, y, parentlevel)
+		@image = Gosu::Image.new(window, "interactives/checkpoint.png", true)
+		@x = x
+		@y = y
+		$everything += [self]
+		@exists = 1
+		@parentlevel = parentlevel
+		@parentlevel.add(self)
+		@window = window
+	end
+	def itemtype; "checkpoint"; end
+	def x; @x; end
+	def y; @y; end
+	def exists; @exists; end
+	def parentlevel; @parentlevel; end
+	def draw
+		@image.draw_rot(@x, @y, 1, 0)
+	end
+	def update
+		if ($osc.x - @x).abs < 25 and ($osc.y - @y).abs < 25
+			if not $checkpoint == self
+				Gosu::Sample.new(@window, "sounds/checkpoint.mp3").play(0.6, 1, false)
+				Particle.new($window, @x, @y, "hud/cpget.png", 0, 0.75, 25)
+			end
+			$checkpoint = self
+		end
+		if $checkpoint == self
+			@image = Gosu::Image.new(@window, "interactives/checkpointactive.png", true)
+		else
+			@image = Gosu::Image.new(@window, "interactives/checkpoint.png", true)
 		end
 	end
 	def delete
@@ -997,7 +988,7 @@ class Level
 					Spikes.new($window, @blockx, @blocky, self)
 				end
 				if c == "8"
-					EmeraldKey.new($window, @blockx, @blocky, self)
+					Checkpoint.new($window, @blockx, @blocky, self)
 				end
 				if c == "a"
 					Prop.new($window, @blockx, @blocky, "props/dirtbg.png")
@@ -1008,6 +999,7 @@ class Level
 				if c == "x" and $placedosc == false
 					$osc = Creature.new($window, @blockx, @blocky, "creatures/osc.png")
 					$sc = Scarf.new($window, 0, 0)
+					#Checkpoint.new($window, @blockx, @blocky, self)
 					$placedosc = true
 				end
 				@charnum += 1
@@ -1069,7 +1061,9 @@ class Game < Gosu::Window
 		$currentlevel.load
 	end
 	def update
-		self.caption = "osc | score: #{$score}"
+		if not $checkpoint == nil
+			self.caption = "osc | score: #{$score}"
+		end
 		$mx = mouse_x
 		$my = mouse_y
 		$cursor = Gosu::Image.new(self, "hud/cursor.png", true)

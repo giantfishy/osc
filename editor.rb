@@ -112,6 +112,7 @@ class Game < Gosu::Window
 		Icon.new(self, 825, 225, "5", "creatures/zombie.png", 2)
 		Icon.new(self, 875, 225, "6", "treasures/gem.png", 2)
 		Icon.new(self, 925, 225, "7", "interactives/spikes.png", 2)
+		Icon.new(self, 975, 225, "8", "interactives/checkpoint.png", 2)
 	end
 	def update
 		self.caption = "Level Editor"
