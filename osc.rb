@@ -948,6 +948,9 @@ class Level
 			if c == "c"
 				Prop.new($window, @blockx, @blocky, "props/brickbg.png")
 			end
+			if c == "d"
+				Prop.new($window, @blockx, @blocky, "props/vinestonebg.png")
+			end
 			@charnum += 1
 		end
 		if $placedosc == true

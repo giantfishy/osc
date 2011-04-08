@@ -96,11 +96,11 @@ class Game < Gosu::Window
 		Icon.new(self, 825, 25, "1", "blocks/brick.png", 1)
 		Icon.new(self, 875, 25, "2", "blocks/wood.png", 1)
 		Icon.new(self, 925, 25, "3", "blocks/dirt.png", 1)
-		Icon.new(self, 975, 25, "4", "blocks/stone.png", 1)
-		Icon.new(self, 825, 75, "5", "blocks/vinestone.png", 1)
+		Icon.new(self, 975, 25, "7", "props/grass.png", 1)
+		Icon.new(self, 825, 75, "4", "blocks/stone.png", 1)
 		Icon.new(self, 875, 75, "6", "props/stonebg.png", 1)
-		Icon.new(self, 925, 75, "7", "props/grass.png", 1)
-		Icon.new(self, 975, 75, "8", "props/mushroom.png", 1)
+		Icon.new(self, 925, 75, "5", "blocks/vinestone.png", 1)
+		Icon.new(self, 975, 75, "d", "props/vinestonebg.png", 1)
 		Icon.new(self, 825, 125, "9", "props/grasstree.png", 1)
 		Icon.new(self, 875, 125, "a", "props/dirtbg.png", 1)
 		Icon.new(self, 925, 125, "b", "props/woodbg.png", 1)
@@ -145,7 +145,7 @@ class Game < Gosu::Window
 			end
 		end
 		if button_down? Gosu::Button::MsRight
-			for i in $everything
+			for i in $items + $interactives
 				if i.x == ((($mx + 25) / 50).round * 50) - 25 and i.y == ((($my + 25) / 50).round * 50) - 25
 					i.delete
 				end

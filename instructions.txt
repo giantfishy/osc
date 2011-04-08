@@ -4,17 +4,7 @@ It uses a few different programs to run, so there are some things you'll need to
 
 First you'll need to download the Ruby programming language. You can skip this if you're on a Mac, since Ruby comes pre-installed with Mac OS X. If you're on a Windows, you can download Ruby from http://www.ruby-lang.org/en/downloads.
 
-Next you'll need to download Rubygems. Download the latest version from http://rubygems.org/pages/download and extract the zip file, then open a console window (on Windows, you'll need to open a Ruby console window, which can be accessed under All Programs > Ruby(version number) > Start Command Prompt with Ruby, and on Mac this is the Terminal, under Applications > Utilities). The console window can be tricky for newcomers, but for installing osc, you'll only need to learn one command: cd (which stands for 'change directory' - a directory being a folder). cd is used for changing which folder you're in; it's the same as double-clicking on a folder in the Finder or Windows Explorer window.
-
-The following instructions are for Windows only:
-
-Typing 'cd My Documents' into the console window will move you to the My Documents folder, as long as the My Documents folder is inside the folder you're in (it's usually inside the folder you're in when you open a new Command Prompt window). Then, type 'cd Downloads' (RubyGems will probably be in your Downloads folder), then cd into the folder you extracted earlier. Then, type 'ruby setup.rb'. This will run the Ruby file which sets up rubygems.
-
-The following instructions are for Mac only:
-
-Typing 'cd Downloads' into Terminal will move you to the Downloads folder, as long as the Downloads folder is inside the folder you're in (it's usually inside the folder you're in when you open a new Terminal window). Then, type 'ruby setup.rb'. This will run the Ruby file which sets up rubygems.
-
-The following instructions are for Mac and Windows.
+Next you'll need to download Rubygems. Again, you can skip this on a Mac. Download the latest version from http://rubygems.org/pages/download and extract the zip file, then open a console window (you'll need to open a Ruby console window, which can be accessed under All Programs > Ruby(version number) > Start Command Prompt with Ruby). The console window can be tricky for newcomers, but for installing osc, you'll only need to learn one command: cd (which stands for 'change directory' - a directory being a folder). cd is used for changing which folder you're in; it's the same as double-clicking on a folder in the Finder or Windows Explorer window. Typing 'cd My Documents' into the console window will move you to the My Documents folder, as long as the My Documents folder is inside the folder you're in (it's usually inside the folder you're in when you open a new Command Prompt window). Then, type 'cd Downloads' (RubyGems will probably be in your Downloads folder), then cd into the folder you extracted earlier. Then, type 'ruby setup.rb'. This will run the Ruby file which sets up rubygems.
 
 After this, you can type 'gem install gosu'. This will install Gosu (the code library used for osc).
 
