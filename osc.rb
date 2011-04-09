@@ -1067,17 +1067,42 @@ class Game < Gosu::Window
 		$mx = mouse_x
 		$my = mouse_y
 		$cursor = Gosu::Image.new(self, "hud/cursor.png", true)
-		if button_down? Gosu::Button::KbW
+		if button_down? Gosu::Button::KbW or button_down? Gosu::Button::KbUp
 			$osc.jump
 		end
-		if button_down? Gosu::Button::KbA
+		if button_down? Gosu::Button::KbA or button_down? Gosu::Button::KbLeft
 			$osc.left
 		end
-		if button_down? Gosu::Button::KbD
+		if button_down? Gosu::Button::KbD or button_down? Gosu::Button::KbRight
 			$osc.right
 		end
 		if button_down? Gosu::Button::MsLeft
 			$osc.fireball
+		end
+		if button_down? Gosu::Button::KbL and button_down? Gosu::Button::Kb1
+			$currentlevel = Level.new("userlevel1.txt", "userlevel1stuff.txt", 1, 100)
+			$placedosc = false
+			$currentlevel.load
+		end
+		if button_down? Gosu::Button::KbL and button_down? Gosu::Button::Kb2
+			$currentlevel = Level.new("userlevel2.txt", "userlevel2stuff.txt", 2, 100)
+			$placedosc = false
+			$currentlevel.load
+		end
+		if button_down? Gosu::Button::KbL and button_down? Gosu::Button::Kb3
+			$currentlevel = Level.new("userlevel3.txt", "userlevel3stuff.txt", 3, 100)
+			$placedosc = false
+			$currentlevel.load
+		end
+		if button_down? Gosu::Button::KbL and button_down? Gosu::Button::Kb4
+			$currentlevel = Level.new("userlevel4.txt", "userlevel4stuff.txt", 4, 100)
+			$placedosc = false
+			$currentlevel.load
+		end
+		if button_down? Gosu::Button::KbL and button_down? Gosu::Button::Kb5
+			$currentlevel = Level.new("userlevel5.txt", "userlevel5stuff.txt", 5, 100)
+			$placedosc = false
+			$currentlevel.load
 		end
 		for i in $everything
 			if i.exists == 1 and $paused == false
