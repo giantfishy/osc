@@ -54,7 +54,7 @@ class Creature < GameObject
 	def goto(x, y); super; end
 	def respawn
 		@particleangle = 0
-		repeat(10) { Particle.new($window, @x, @y, "effects/blood.png", @particleangle, rand(6), 8); @particleangle += 36 }
+		repeat(10) { Particle.new($window, @x, @y, $texturepack + "effects/blood.png", @particleangle, rand(6), 8); @particleangle += 36 }
 		@step = 0
 		until @step > 10
 			@step += 1
@@ -156,7 +156,7 @@ class Creature < GameObject
 		if $paused == false
 			@x -= 4
 			if $osc == self
-				@image = Gosu::Image.new($window, "creatures/oscleft.png", true)
+				@image = Gosu::Image.new($window, $texturepack + "creatures/oscleft.png", true)
 				@dir = 0
 			end
 		end
@@ -165,7 +165,7 @@ class Creature < GameObject
 		if $paused == false
 			@x += 4
 			if $osc == self
-				@image = Gosu::Image.new($window, "creatures/oscright.png", true)
+				@image = Gosu::Image.new($window, $texturepack + "creatures/oscright.png", true)
 				@dir = 1
 			end
 		end
@@ -173,7 +173,7 @@ class Creature < GameObject
 	def fireball
 		if @cooldown < 0
 			@tomouse = Vector[($mx - @x), ($my - @y)]
-			Projectile.new($window, @x, @y, Gosu::offset_x(@tomouse.theta, 8), Gosu::offset_y(@tomouse.theta, 8), "projectiles/fireball.png")
+			Projectile.new($window, @x, @y, Gosu::offset_x(@tomouse.theta, 8), Gosu::offset_y(@tomouse.theta, 8), $texturepack + "projectiles/fireball.png")
 			@cooldown = 50
 		end
 	end
@@ -269,12 +269,12 @@ class Enemy < Creature
 	def shoot(x, y)
 		@target = Vector[x, y]
 		@target = @target * (1 / @target.r)
-		EnemyProjectile.new($window, @x, @y, Gosu::offset_x(@target.theta, 10), Gosu::offset_y(@target.theta, 10), "projectiles/fireball.png")
+		EnemyProjectile.new($window, @x, @y, Gosu::offset_x(@target.theta, 10), Gosu::offset_y(@target.theta, 10), $texturepack + "projectiles/fireball.png")
 	end
 	def delete
 		super
 		@particleangle = 0
-		repeat(10) { Particle.new($window, @x, @y, "effects/blood.png", @particleangle, rand(6), 8); @particleangle += 36}
+		repeat(10) { Particle.new($window, @x, @y, $texturepack + "effects/blood.png", @particleangle, rand(6), 8); @particleangle += 36}
 	end
 end
 
@@ -335,7 +335,7 @@ class Projectile < GameObject
 	def y; @y; end
 	def exists; @exists; end
 	def draw
-		Gosu::Image.new($window, "effects/orangelight.png", true).draw_rot(@x.round, @y.round, 0, 0)
+		Gosu::Image.new($window, $texturepack + "effects/orangelight.png", true).draw_rot(@x.round, @y.round, 0, 0)
 		@image.draw_rot(@x.round, @y.round, 0, 0)
 	end
 	def update
@@ -360,7 +360,7 @@ class Projectile < GameObject
 		$fireball = 0
 		@particleangle = 0
 		SplashDamage.new(50, @x, @y, 15)
-		repeat(8) { Particle.new($window, @x, @y, "effects/splosionsmall.png", @particleangle, 5, 5); @particleangle += 45 }
+		repeat(8) { Particle.new($window, @x, @y, $texturepack + "effects/splosionsmall.png", @particleangle, 5, 5); @particleangle += 45 }
 	end
 end
 
@@ -399,7 +399,7 @@ class EnemyProjectile < GameObject
 		super
 		@particleangle = 0
 		EnemySplashDamage.new(50, @x, @y)
-		repeat(8) { Particle.new($window, @x, @y, "effects/splosionsmall.png", @particleangle, 5, 5); @particleangle += 45 }
+		repeat(8) { Particle.new($window, @x, @y, $texturepack + "effects/splosionsmall.png", @particleangle, 5, 5); @particleangle += 45 }
 	end
 end
 
@@ -412,7 +412,7 @@ end
 	# def exists; super; end
 	# def draw
 		# @particleangle = Vector[@xspeed, @yspeed].r + 180 + rand(90)
-		# Particle.new($window, @x, @y, "effects/splosionsmall.png", @particleangle, 3, 6)
+		# Particle.new($window, @x, @y, $texturepack + "effects/splosionsmall.png", @particleangle, 3, 6)
 		# @image.draw_rot(@x.round, @y.round, 0, 0)
 	# end
 	# def update
@@ -468,7 +468,7 @@ end
 
 class Key < GameObject
 	def initialize (window, x, y, parentlevel)
-		@image = Gosu::Image.new(window, "interactives/key.png", true)
+		@image = Gosu::Image.new(window, $texturepack + "interactives/key.png", true)
 		@x = x
 		@y = y
 		$everything = $everything + [self]
@@ -485,9 +485,9 @@ class Key < GameObject
 	end
 	def update
 		if ($osc.x - @x).abs < 25 and ($osc.y - @y).abs < 25
-			Gosu::Sample.new(@window, "sounds/treasure.mp3").play(0.6, 1, false)
+			Gosu::Sample.new(@window, $texturepack + "sounds/treasure.mp3").play(0.6, 1, false)
 			@particleangle = 0
-			repeat(5) { Particle.new($window, @x, @y, "effects/star.png", @particleangle, 6, 10); @particleangle += 72 }
+			repeat(5) { Particle.new($window, @x, @y, $texturepack + "effects/star.png", @particleangle, 6, 10); @particleangle += 72 }
 			$keys += 1
 			self.delete
 		end
@@ -516,9 +516,9 @@ class Treasure < GameObject
 	end
 	def update
 		if ($osc.x - @x).abs < 25 and ($osc.y - @y).abs < 25
-			Gosu::Sample.new(@window, "sounds/treasure.mp3").play(0.6, 1, false)
+			Gosu::Sample.new(@window, $texturepack + "sounds/treasure.mp3").play(0.6, 1, false)
 			@particleangle = 0
-			repeat(5) { Particle.new($window, @x, @y, "effects/greenstar.png", @particleangle, 6, 10); @particleangle += 72 }
+			repeat(5) { Particle.new($window, @x, @y, $texturepack + "effects/greenstar.png", @particleangle, 6, 10); @particleangle += 72 }
 			$score += 100
 			self.delete
 		end
@@ -530,7 +530,7 @@ end
 
 class Door < GameObject
 	def initialize (window, x, y, parentlevel)
-		@image = Gosu::Image.new(window, "interactives/door.png", true)
+		@image = Gosu::Image.new(window, $texturepack + "interactives/door.png", true)
 		@x = x
 		@y = y
 		$everything = $everything + [self]
@@ -548,7 +548,7 @@ class Door < GameObject
 	def update
 		if ($osc.x - @x).abs < 50 and ($osc.y - @y).abs < 50 and $keys > 0
 			@particleangle = 0
-			repeat(8) { Particle.new($window, @x, @y, "effects/splosion.png", @particleangle, 8, 5); @particleangle += 45 }
+			repeat(8) { Particle.new($window, @x, @y, $texturepack + "effects/splosion.png", @particleangle, 8, 5); @particleangle += 45 }
 			$keys -= 1
 			self.delete
 		end
@@ -561,7 +561,7 @@ end
 
 class Sign < GameObject
 	def initialize (window, x, y)
-		@image = Gosu::Image.new(window, "interactives/sign.png", true)
+		@image = Gosu::Image.new(window, $texturepack + "interactives/sign.png", true)
 		@x = x
 		@y = y
 		$everything = $everything + [self]
@@ -585,7 +585,7 @@ end
 
 # class Turret < GameObject
 	# def initialize (window, x, y, parentlevel)
-		# @image = Gosu::Image.new(window, "interactives/turret.png", true)
+		# @image = Gosu::Image.new(window, $texturepack + "interactives/turret.png", true)
 		# @x = x
 		# @y = y
 		# $everything = $everything + [self]
@@ -609,7 +609,7 @@ end
 	# def update
 		# @toosc = Vector[($osc.x - @x), ($osc.y - @y)]
 		# if @toosc.r < 1000 and @cooldown < 0
-			# TurretFireball.new($window, @x, @y, Gosu::offset_x(@toosc.theta, 7), Gosu::offset_y(@toosc.theta, 7), "projectiles/turretfireball.png")
+			# TurretFireball.new($window, @x, @y, Gosu::offset_x(@toosc.theta, 7), Gosu::offset_y(@toosc.theta, 7), $texturepack + "projectiles/turretfireball.png")
 			# @cooldown = 50
 		# end
 		# if @health < 1
@@ -625,7 +625,7 @@ end
 
 class Spikes < GameObject
 	def initialize(window, x, y, parentlevel)
-		@image = Gosu::Image.new(window, "interactives/spikes.png", true)
+		@image = Gosu::Image.new(window, $texturepack + "interactives/spikes.png", true)
 		@x = x
 		@y = y
 		$everything += [self]
@@ -651,7 +651,7 @@ end
 
 class Checkpoint < GameObject
 	def initialize (window, x, y, parentlevel)
-		@image = Gosu::Image.new(window, "interactives/checkpoint.png", true)
+		@image = Gosu::Image.new(window, $texturepack + "interactives/checkpoint.png", true)
 		@x = x
 		@y = y
 		$everything += [self]
@@ -671,15 +671,15 @@ class Checkpoint < GameObject
 	def update
 		if ($osc.x - @x).abs < 25 and ($osc.y - @y).abs < 25
 			if not $checkpoint == self
-				Gosu::Sample.new(@window, "sounds/checkpoint.mp3").play(0.6, 1, false)
-				Particle.new($window, @x, @y, "hud/cpget.png", 0, 0.75, 25)
+				Gosu::Sample.new(@window, $texturepack + "sounds/checkpoint.mp3").play(0.6, 1, false)
+				Particle.new($window, @x, @y, $texturepack + "hud/cpget.png", 0, 0.75, 25)
 			end
 			$checkpoint = self
 		end
 		if $checkpoint == self
-			@image = Gosu::Image.new(@window, "interactives/checkpointactive.png", true)
+			@image = Gosu::Image.new(@window, $texturepack + "interactives/checkpointactive.png", true)
 		else
-			@image = Gosu::Image.new(@window, "interactives/checkpoint.png", true)
+			@image = Gosu::Image.new(@window, $texturepack + "interactives/checkpoint.png", true)
 		end
 	end
 	def delete
@@ -765,7 +765,7 @@ end
 
 # class Cursor < GameObject
 	# def initialize (window, x, y)
-		# @image = Gosu::Image.new(window, "hud/cursor.png", true)
+		# @image = Gosu::Image.new(window, $texturepack + "hud/cursor.png", true)
 		# @x = x
 		# @y = y
 		# $everything += [self]
@@ -808,7 +808,7 @@ end
 class Scarf < GameObject
 	def initialize(window, x, y)
 		@window = window
-		@image = Gosu::Image.new(@window, "scarf/right1.png", true)
+		@image = Gosu::Image.new(@window, $texturepack + "scarf/right1.png", true)
 		@x = x
 		@y = y
 		$everything += [self]
@@ -904,48 +904,48 @@ class Level
 			@blocky = @blocky * 50
 			@blocky += 25
 			if c == "1"
-				Block.new($window, @blockx, @blocky, "blocks/brick.png")
+				Block.new($window, @blockx, @blocky, $texturepack + "blocks/brick.png")
 			end
 			if c == "2"
-				Block.new($window, @blockx, @blocky, "blocks/wood.png")
+				Block.new($window, @blockx, @blocky, $texturepack + "blocks/wood.png")
 			end
 			if c == "3"
-				Block.new($window, @blockx, @blocky, "blocks/dirt.png")
+				Block.new($window, @blockx, @blocky, $texturepack + "blocks/dirt.png")
 			end
 			if c == "4"
-				Block.new($window, @blockx, @blocky, "blocks/stone.png")
+				Block.new($window, @blockx, @blocky, $texturepack + "blocks/stone.png")
 			end
 			if c == "5"
-				Block.new($window, @blockx, @blocky, "blocks/vinestone.png")
+				Block.new($window, @blockx, @blocky, $texturepack + "blocks/vinestone.png")
 			end
 			if c == "6"
-				Prop.new($window, @blockx, @blocky, "props/stonebg.png")
+				Prop.new($window, @blockx, @blocky, $texturepack + "props/stonebg.png")
 			end
 			if c == "7"
-				Prop.new($window, @blockx, @blocky, "props/grass.png")
+				Prop.new($window, @blockx, @blocky, $texturepack + "props/grass.png")
 			end
 			if c == "8"
-				Prop.new($window, @blockx, @blocky, "props/mushroom.png")
+				Prop.new($window, @blockx, @blocky, $texturepack + "props/mushroom.png")
 			end
 			if c == "9"
-				Prop.new($window, @blockx, @blocky, "props/grasstree.png")
+				Prop.new($window, @blockx, @blocky, $texturepack + "props/grasstree.png")
 			end
 			if c == "a"
-				Prop.new($window, @blockx, @blocky, "props/dirtbg.png")
+				Prop.new($window, @blockx, @blocky, $texturepack + "props/dirtbg.png")
 			end
 			if c == "b"
-				Prop.new($window, @blockx, @blocky, "props/woodbg.png")
+				Prop.new($window, @blockx, @blocky, $texturepack + "props/woodbg.png")
 			end
 			if c == "c"
-				Prop.new($window, @blockx, @blocky, "props/brickbg.png")
+				Prop.new($window, @blockx, @blocky, $texturepack + "props/brickbg.png")
 			end
 			if c == "d"
-				Prop.new($window, @blockx, @blocky, "props/vinestonebg.png")
+				Prop.new($window, @blockx, @blocky, $texturepack + "props/vinestonebg.png")
 			end
 			@charnum += 1
 		end
 		if $placedosc == true
-			$osc = Creature.new($window, @lastx, @lasty, "creatures/osc.png")
+			$osc = Creature.new($window, @lastx, @lasty, $texturepack + "creatures/osc.png")
 			$sc = Scarf.new($window, 0, 0)
 		end
 		loadextras
@@ -973,16 +973,16 @@ class Level
 					Door.new($window, @blockx, @blocky, self)
 				end
 				if c == "3"
-					Climbable.new($window, @blockx, @blocky, "props/ladder.png", self)
+					Climbable.new($window, @blockx, @blocky, $texturepack + "props/ladder.png", self)
 				end
 				if c == "4"
-					Climbable.new($window, @blockx, @blocky, "blocks/water.png", self)
+					Climbable.new($window, @blockx, @blocky, $texturepack + "blocks/water.png", self)
 				end
 				if c == "5"
-					Enemy.new($window, @blockx, @blocky, "creatures/zombie.png", 10, 1.8, self)
+					Enemy.new($window, @blockx, @blocky, $texturepack + "creatures/zombie.png", 10, 1.8, self)
 				end
 				if c == "6"
-					Treasure.new($window, @blockx, @blocky, 100, "treasures/gem.png", self)
+					Treasure.new($window, @blockx, @blocky, 100, $texturepack + "treasures/gem.png", self)
 				end
 				if c == "7"
 					Spikes.new($window, @blockx, @blocky, self)
@@ -991,13 +991,13 @@ class Level
 					Checkpoint.new($window, @blockx, @blocky, self)
 				end
 				if c == "a"
-					Prop.new($window, @blockx, @blocky, "props/dirtbg.png")
+					Prop.new($window, @blockx, @blocky, $texturepack + "props/dirtbg.png")
 				end
 				if c == "b"
-					Prop.new($window, @blockx, @blocky, "props/dirtbg.png")
+					Prop.new($window, @blockx, @blocky, $texturepack + "props/dirtbg.png")
 				end
 				if c == "x" and $placedosc == false
-					$osc = Creature.new($window, @blockx, @blocky, "creatures/osc.png")
+					$osc = Creature.new($window, @blockx, @blocky, $texturepack + "creatures/osc.png")
 					$sc = Scarf.new($window, 0, 0)
 					#Checkpoint.new($window, @blockx, @blocky, self)
 					$placedosc = true
@@ -1019,8 +1019,8 @@ class Level
 			end
 		end
 		#Cursor.new($window, 0, 0)
-		KeyHUD.new($window, 750, 25, "interactives/key.png")
-		$pausescreen = GenericHUD.new($window, 400, 300, "hud/pausescreen.png")
+		KeyHUD.new($window, 750, 25, $texturepack + "interactives/key.png")
+		$pausescreen = GenericHUD.new($window, 400, 300, $texturepack + "hud/pausescreen.png")
 		$pausescreen.hide
 	end
 end
@@ -1030,18 +1030,19 @@ class Game < Gosu::Window
 		super(800, 600, false)
 		self.caption = "osc"
 		$everything = $blocks = $enemies = $climbables = []
+		$texturepack = File.open("texturepack.txt")
+		$texturepack = $texturepack.readline
 		$keys = 0
 		$inventory = []
 		$score = 0
 		$paused = false
-		$test = Prop.new(self, 0, 0, "effects/light.png")
-		@bg = Gosu::Image.new(self, "background.png", true)
-		$music = Gosu::Sample.new(self, "music/start.mp3")
+		@bg = Gosu::Image.new(self, $texturepack + "background.png", true)
+		$music = Gosu::Sample.new(self, $texturepack + "music/start.mp3")
 		$placedosc = false
 		$fireball = 0
-		$blocktypes = ["blocks/brick.png", "blocks/wood.png", "blocks/dirt.png", "blocks/stone.png", "blocks/vinestone.png"]
-		$scleft = ["scarf/left1.png", "scarf/left2.png", "scarf/left3.png"]
-		$scright = ["scarf/right1.png", "scarf/right2.png", "scarf/right3.png"]
+		$blocktypes = [$texturepack + "blocks/brick.png", $texturepack + "blocks/wood.png", $texturepack + "blocks/dirt.png", $texturepack + "blocks/stone.png", $texturepack + "blocks/vinestone.png"]
+		$scleft = [$texturepack + "scarf/left1.png", $texturepack + "scarf/left2.png", $texturepack + "scarf/left3.png"]
+		$scright = [$texturepack + "scarf/right1.png", $texturepack + "scarf/right2.png", $texturepack + "scarf/right3.png"]
 		$music.play(0.4, 1, true)
 	end
 	def start
@@ -1066,7 +1067,7 @@ class Game < Gosu::Window
 		end
 		$mx = mouse_x
 		$my = mouse_y
-		$cursor = Gosu::Image.new(self, "hud/cursor.png", true)
+		$cursor = Gosu::Image.new(self, $texturepack + "hud/cursor.png", true)
 		if button_down? Gosu::Button::KbW or button_down? Gosu::Button::KbUp
 			$osc.jump
 		end
